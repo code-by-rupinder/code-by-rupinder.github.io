@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>S3 Event Exporter - Documentation | Rupinder Singh</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+    /* Logo code character animation */
+    .logo .code-char { transition: transform 0.3s cubic-bezier(.68,-0.55,.27,1.55); display: inline-block; }
+    .logo:hover .code-char-1 { animation: code-move-1 0.7s infinite alternate; }
+    .logo:hover .code-char-2 { animation: code-move-2 0.7s infinite alternate; }
+    .logo:hover .code-char-3 { animation: code-move-3 0.7s infinite alternate; }
+    @keyframes code-move-1 { 0% { transform: translateX(0); } 100% { transform: translateX(-6px); } }
+    @keyframes code-move-2 { 0% { transform: translateX(0); } 100% { transform: translateX(6px); } }
+    @keyframes code-move-3 { 0% { transform: translateX(0); } 100% { transform: translateX(-4px); } }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+            --accent-color: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--dark-gradient);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            backdrop-filter: blur(20px);
+            background: rgba(12, 12, 12, 0.9);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .back-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: var(--accent-color);
+            color: #000;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 120px auto 50px;
+            padding: 0 20px;
+        }
+
+        .doc-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .doc-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .doc-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 30px;
+        }
+
+        .project-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        /* Section Styling */
+        .doc-section {
+            margin-bottom: 60px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-description {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+
+        /* Architecture Diagram Styles */
+        .architecture-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 20px 0;
+            overflow-x: auto;
+            position: relative;
+            min-height: 180px;
+        }
+
+        .arch-component {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 16px;
+            min-width: 110px;
+            max-width: 140px;
+            min-height: 120px;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .arch-component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+            border-color: var(--accent-color);
+        }
+
+        .component-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            z-index: 2;
+            position: relative;
+        }
+
+        .component-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        /* S3 File Export Animation */
+        .file-export-animation {
+            position: absolute;
+            top: 50%;
+            right: -20px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .s3-component:hover .file-export-animation {
+            opacity: 1;
+        }
+
+        .file-particle {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-color);
+            border-radius: 2px;
+            position: absolute;
+            animation: fileExport 2s infinite ease-in-out;
+        }
+
+        .file-particle:nth-child(1) {
+            animation-delay: 0s;
+            top: -10px;
+        }
+
+        .file-particle:nth-child(2) {
+            animation-delay: 0.3s;
+            top: 0px;
+        }
+
+        .file-particle:nth-child(3) {
+            animation-delay: 0.6s;
+            top: 10px;
+        }
+
+        @keyframes fileExport {
+            0% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(40px) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* SQS Queue Animation */
+        .queue-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sqs-component:hover .queue-animation {
+            opacity: 1;
+        }
+
+        .queue-item {
+            width: 12px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 2px 0;
+            border-radius: 2px;
+            animation: queueFlow 1.5s infinite ease-in-out;
+        }
+
+        .queue-item:nth-child(1) { animation-delay: 0s; }
+        .queue-item:nth-child(2) { animation-delay: 0.2s; }
+        .queue-item:nth-child(3) { animation-delay: 0.4s; }
+        .queue-item:nth-child(4) { animation-delay: 0.6s; }
+
+        @keyframes queueFlow {
+            0%, 100% {
+                transform: translateX(-10px);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translateX(10px);
+                opacity: 1;
+            }
+        }
+
+        /* Gear Animation for S3 Event Exporter */
+        .gear-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .exporter-component:hover .gear-animation {
+            opacity: 1;
+        }
+
+        .gear {
+            position: absolute;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .gear-1 {
+            top: -10px;
+            left: -10px;
+            animation: rotateGear 2s linear infinite;
+        }
+
+        .gear-2 {
+            top: 5px;
+            left: 5px;
+            font-size: 1rem;
+            animation: rotateGear 2s linear infinite reverse;
+        }
+
+        @keyframes rotateGear {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Prometheus Monitoring Animation */
+        .monitoring-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .prometheus-component:hover .monitoring-animation {
+            opacity: 1;
+        }
+
+        .pulse-ring {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite ease-out;
+        }
+
+        .pulse-ring:nth-child(2) {
+            animation-delay: 1s;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.3);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .metrics-dots {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .metric-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            position: absolute;
+            animation: metricBlink 1s infinite ease-in-out;
+        }
+
+        .metric-dot:nth-child(1) {
+            top: -8px;
+            left: 0;
+            animation-delay: 0s;
+        }
+
+        .metric-dot:nth-child(2) {
+            top: 0;
+            left: 8px;
+            animation-delay: 0.3s;
+        }
+
+        .metric-dot:nth-child(3) {
+            top: 8px;
+            left: -8px;
+            animation-delay: 0.6s;
+        }
+
+        @keyframes metricBlink {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Grafana Dashboard Animation */
+        .dashboard-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .grafana-component:hover .dashboard-animation {
+            opacity: 1;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: end;
+            gap: 2px;
+            height: 20px;
+            width: 20px;
+            margin-bottom: 5px;
+        }
+
+        .chart-bar {
+            background: var(--accent-color);
+            width: 3px;
+            border-radius: 1px;
+            animation: chartGrow 2s infinite ease-in-out;
+        }
+
+        .chart-bar:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .chart-bar:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .chart-bar:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .chart-bar:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes chartGrow {
+            0%, 100% {
+                height: 4px;
+                opacity: 0.6;
+            }
+            50% {
+                height: 16px;
+                opacity: 1;
+            }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            width: 24px;
+            height: 16px;
+        }
+
+        .dashboard-panel {
+            background: linear-gradient(45deg, var(--accent-color), rgba(0, 212, 255, 0.3));
+            border-radius: 2px;
+            animation: panelFlicker 3s infinite ease-in-out;
+        }
+
+        .dashboard-panel:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .dashboard-panel:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .dashboard-panel:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .dashboard-panel:nth-child(4) {
+            animation-delay: 1.5s;
+        }
+
+        @keyframes panelFlicker {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            25% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+            75% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Architecture Arrows */
+        .arch-arrow {
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin: 0 5px;
+            flex-shrink: 0;
+        }
+
+        .arrow-line {
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-color), transparent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .arrow-head {
+            width: 0;
+            height: 0;
+            border-left: 8px solid var(--accent-color);
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            margin-left: -2px;
+        }
+
+        .data-flow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.8);
+            animation: dataFlow 2s infinite ease-in-out;
+        }
+
+        @keyframes dataFlow {
+            0% {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(60px);
+                opacity: 0;
+            }
+        }
+
+        /* Tooltip styles */
+        .arch-component[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            border: 1px solid var(--accent-color);
+        }
+
+        .arch-component[data-tooltip]:hover::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--accent-color);
+            z-index: 1000;
+        }
+
+        /* Installation Methods */
+        .installation-grid {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+        .install-method {
+            min-width: 340px;
+            max-width: 400px;
+            flex: 0 0 340px;
+            box-sizing: border-box;
+        }
+
+        .install-method {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .install-method h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .code-snippet code {
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            display: block;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .metric-item {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .metric-item h4 {
+            color: var(--accent-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .metric-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Configuration Features */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .config-item {
+            background: rgba(240, 147, 251, 0.05);
+            border: 1px solid rgba(240, 147, 251, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .config-item h4 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .config-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Features List */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            color: var(--text-secondary);
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Links */
+        .doc-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .doc-link {
+            padding: 15px 30px;
+            background: var(--primary-gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doc-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Mobile Responsiveness */
+    @media (max-width: 1024px) {
+            .nav-links {
+                display: none;
+            }
+
+            .main-content {
+                margin-top: 100px;
+                padding: 0 15px;
+            }
+
+            .doc-section {
+                padding: 25px;
+            }
+
+            .architecture-diagram {
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+                padding: 30px 15px;
+            }
+
+            .arch-arrow {
+                transform: rotate(90deg);
+                margin: 0;
+            }
+
+            .arch-component {
+                min-width: 140px;
+                max-width: 200px;
+            }
+
+            .installation-grid {
+                flex-direction: column;
+                flex-wrap: wrap;
+            }
+            .install-method {
+                min-width: 100%;
+                max-width: 100%;
+                flex: 1 1 100%;
+            }
+            .metrics-grid,
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .doc-links {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .architecture-diagram {
+                gap: 15px;
+                padding: 30px 15px;
+                overflow-x: auto;
+            }
+            
+            .arch-component {
+                min-width: 100px;
+                max-width: 120px;
+                padding: 15px 10px;
+            }
+
+            .component-icon {
+                font-size: 2rem;
+            }
+
+            .component-label {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="../" class="logo" style="display: flex; flex-direction: column; align-items: center; text-decoration: none;">
+                <!-- Stack of Containers Symbol (Solid Colors, Animated Code Characters) -->
+                <span style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2px;">
+                    <span style="width: 44px; height: 14px; background: #223a5e; border-radius: 6px; margin-bottom: 2px; box-shadow: 0 2px 6px #223a5e22; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fab fa-docker" style="color: #fff; font-size: 1rem;"></i>
+                        <span class="code-char code-char-1" style="position: absolute; left: 6px; font-size: 0.85rem; color: #111; opacity: 0.85; font-family: 'JetBrains Mono', monospace;">{}</span>
+                    </span>
+                    <span style="width: 44px; height: 14px; background: #326ce5; border-radius: 6px; margin-bottom: 2px; box-shadow: 0 2px 6px #326ce522; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fab fa-kubernetes" style="color: #fff; font-size: 1rem;"></i>
+                        <span class="code-char code-char-2" style="position: absolute; right: 6px; font-size: 0.85rem; color: #00d4ff; opacity: 0.85; font-family: 'JetBrains Mono', monospace;">&lt;/&gt;</span>
+                    </span>
+                    <span style="width: 44px; height: 14px; background: #ffd700; border-radius: 6px; box-shadow: 0 2px 6px #ffd70022; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fas fa-cubes" style="color: #222; font-size: 1rem;"></i>
+                        <span class="code-char code-char-3" style="position: absolute; right: 6px; font-size: 0.85rem; color: #b8860b; opacity: 0.85; font-family: 'JetBrains Mono', monospace;">:=</span>
+                    </span>
+                </span>
+                <!-- Brand Name Below (Solid Color) -->
+                <span style="font-family: 'Space Grotesk', 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.18rem; letter-spacing: 0.5px; text-align: center; margin-top: 2px; color: #223a5e;">
+                    code-by-<span style="color: #ffd700;">rupinder</span>
+                </span>
+            </a>
+            <!-- Removed nav-links: Home, Skills, Projects, Contact -->
+            <a href="../" class="back-btn">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="doc-header">
+            <h1 class="doc-title">S3 Event Exporter</h1>
+            <p class="doc-subtitle">Universal S3 Event Exporter: Deploy Anywhere—Kubernetes, Docker, or Linux</p>
+            <div class="project-badges">
+                <span class="badge">Go</span>
+                <span class="badge">Kubernetes</span>
+                <span class="badge">Prometheus</span>
+                <span class="badge">Grafana</span>
+                <span class="badge">AWS S3</span>
+                <span class="badge">SQS</span>
+                <span class="badge">Docker</span>
+                <span class="badge">Helm</span>
+            </div>
+        </div>
+
+        <!-- Project Links -->
+        <div class="doc-links">
+            <a href="https://github.com/code-by-rupinder/s3-metrics-adaptor" class="doc-link">
+                <i class="fab fa-github"></i>
+                View Source Code
+            </a>
+            <a href="https://github.com/code-by-rupinder/s3-metrics-adaptor/releases" class="doc-link">
+                <i class="fas fa-download"></i>
+                Download Latest Artifact (s3-metrics-adaptor)
+            </a>
+            <script>
+            // Remove the old link if present
+            </script>
+        </div>
+
+        <!-- Overview -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Project Overview
+            </h2>
+            <p class="section-description">
+                S3 Event Exporter is a high-performance, enterprise-grade Kubernetes application designed to process Amazon S3 events 
+                from SQS queues and export comprehensive Prometheus metrics. Built with Go for optimal performance, it features 
+                production-ready deployment configurations with Helm charts and comprehensive monitoring capabilities.
+            </p>
+
+            <!-- Problem Statement -->
+            <div style="background: rgba(240, 147, 251, 0.1); border: 1px solid rgba(240, 147, 251, 0.3); border-radius: 15px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: var(--accent-color); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    The Problem: AWS CloudWatch S3 Monitoring Limitations
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff4444; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #ff6666; margin-bottom: 10px;">❌ Best-Effort Delivery</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">AWS explicitly states CloudWatch metrics are "best-effort" - data points may be delayed, incomplete, or missing entirely.</p>
+                    </div>
+                    <div style="background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff4444; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #ff6666; margin-bottom: 10px;">❌ No Real-Time Events</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">CloudWatch only provides aggregated metrics, not individual S3 event details like user identity, source IP, or object-level metadata.</p>
+                    </div>
+                    <div style="background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff4444; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #ff6666; margin-bottom: 10px;">❌ Limited Security Insights</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">No user-level tracking, IP analysis, or anomaly detection for suspicious deletion patterns or bulk operations.</p>
+                    </div>
+                    <div style="background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff4444; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #ff6666; margin-bottom: 10px;">❌ No Custom Analysis</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Cannot track hierarchical paths, file extensions, or custom business logic for data organization patterns.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solution Statement -->
+            <div style="background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 15px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: var(--accent-color); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle"></i>
+                    Our Solution: Event-Driven Real-Time Monitoring
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="background: rgba(0, 255, 0, 0.1); border-left: 3px solid #44ff44; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #66ff66; margin-bottom: 10px;">✅ 100% Event Capture</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Every S3 event is processed via SQS with guaranteed delivery, retry logic, and dead letter queue handling.</p>
+                    </div>
+                    <div style="background: rgba(0, 255, 0, 0.1); border-left: 3px solid #44ff44; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #66ff66; margin-bottom: 10px;">✅ Real-Time Processing</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Individual event analysis with user identity, source IP, object metadata, and latency tracking in real-time.</p>
+                    </div>
+                    <div style="background: rgba(0, 255, 0, 0.1); border-left: 3px solid #44ff44; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #66ff66; margin-bottom: 10px;">✅ Advanced Security</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Built-in anomaly detection for system deletions, bulk operations, and unauthorized access patterns.</p>
+                    </div>
+                    <div style="background: rgba(0, 255, 0, 0.1); border-left: 3px solid #44ff44; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #66ff66; margin-bottom: 10px;">✅ Custom Intelligence</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Hierarchical path analysis, file type distribution, and configurable business logic for data organization insights.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="color: var(--accent-color); margin: 30px 0 15px 0;">Key Features</h3>
+            <ul class="feature-list">
+                <li>Real-time S3 event processing from SQS queues with configurable batch sizes</li>
+                <li>12+ comprehensive Prometheus metrics with anomaly detection capabilities</li>
+                <li>Production-grade Helm charts with customizable values and resource management</li>
+                <li>Docker-based deployment with multi-architecture support</li>
+                <li>Enterprise-ready monitoring, alerting, and observability features</li>
+                <li>Configurable metrics enabling/disabling for optimized performance</li>
+                <li>Advanced hierarchical path tracking and file type analysis</li>
+                <li>Built-in anomaly detection for security monitoring</li>
+            </ul>
+        </section>
+
+        <!-- Comparison with AWS CloudWatch -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-balance-scale"></i>
+                AWS CloudWatch vs S3 Event Exporter
+            </h2>
+            <p class="section-description">
+                Understanding the fundamental differences between AWS's native CloudWatch S3 monitoring and our event-driven approach.
+            </p>
+            
+            <div style="overflow-x: auto; margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden;">
+                    <thead style="background: var(--primary-gradient);">
+                        <tr>
+                            <th style="padding: 15px; text-align: left; color: white; font-weight: 600;">Feature</th>
+                            <th style="padding: 15px; text-align: center; color: white; font-weight: 600;">AWS CloudWatch</th>
+                            <th style="padding: 15px; text-align: center; color: white; font-weight: 600;">S3 Event Exporter</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">Data Reliability</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ Best-effort delivery<br><small>May miss data points</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Guaranteed delivery<br><small>SQS ensures all events</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
+                            <td style="padding: 15px; font-weight: 500;">Event Detail Level</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ Aggregated metrics only<br><small>No individual event data</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Full event metadata<br><small>User, IP, object details</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">Security Monitoring</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ Basic request counts<br><small>No anomaly detection</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Advanced security alerts<br><small>Anomaly & threat detection</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
+                            <!-- Removed deprecated: User Activity Tracking and user analysis rows -->
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">Custom Business Logic</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ Fixed metrics only<br><small>No customization</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Fully configurable<br><small>Custom hierarchical tracking</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
+                            <td style="padding: 15px; font-weight: 500;">File Type Analysis</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ Not supported<br><small>No extension tracking</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Complete file analysis<br><small>Extension, directory tracking</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">Real-time Processing</td>
+                            <td style="padding: 15px; text-align: center; color: #ffa500;">⚠️ Delayed metrics<br><small>Minutes to hours delay</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Sub-second latency<br><small>Immediate event processing</small></td>
+                        </tr>
+                        <tr style="background: rgba(255, 255, 255, 0.02);">
+                            <td style="padding: 15px; font-weight: 500;">Cost Efficiency</td>
+                            <td style="padding: 15px; text-align: center; color: #ffa500;">⚠️ CloudWatch costs<br><small>Per metric, per request</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Fixed Kubernetes cost<br><small>No per-metric charges</small></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 15px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: var(--accent-color); margin-bottom: 15px;">💡 The Bottom Line</h3>
+                <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                    <strong>AWS CloudWatch S3 metrics are designed for basic operational monitoring.</strong> Our S3 Event Exporter fills 
+                    the critical gap for organizations requiring <strong>100% reliable, real-time, security-focused S3 monitoring</strong> 
+                    with detailed event analysis, user tracking, and custom business intelligence.
+                </p>
+            </div>
+        </section>
+
+        <!-- Inventory vs Event-Driven Comparison -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-code-branch"></i>
+                Inventory-Based vs Event-Driven Monitoring
+            </h2>
+            <p class="section-description">
+                Understanding the fundamental differences between inventory-based S3 monitoring (using ListObjects) and our event-driven approach.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 30px 0;">
+                <div style="background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 15px; padding: 25px;">
+                    <h3 style="color: #ff9800; margin-bottom: 20px; display: flex; align-items: center;">
+                        <i class="fas fa-list" style="margin-right: 10px;"></i>
+                        Inventory-Based Monitoring
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        Periodically scans S3 buckets using ListObjects API to gather current state information.
+                    </p>
+                    
+                    <h4 style="color: #ff9800; margin: 15px 0 10px 0;">Example Metrics:</h4>
+                    <div style="background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+                        <div style="color: #4fc3f7;">s3_biggest_object_size_bytes</div>
+                        <div style="color: #4fc3f7;">s3_objects_size_sum_bytes</div>
+                        <div style="color: #4fc3f7;">s3_objects</div>
+                        <div style="color: #4fc3f7;">s3_list_duration_seconds</div>
+                    </div>
+                    
+                    <h4 style="color: #ff9800; margin: 15px 0 10px 0;">Best For:</h4>
+                    <ul style="color: var(--text-secondary); padding-left: 20px;">
+                        <li>Storage capacity planning</li>
+                        <li>Cost analysis & optimization</li>
+                        <li>Current bucket state snapshots</li>
+                        <li>Periodic compliance reporting</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 15px; padding: 25px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 20px; display: flex; align-items: center;">
+                        <i class="fas fa-bolt" style="margin-right: 10px;"></i>
+                        Event-Driven Monitoring
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        Processes individual S3 events in real-time as they occur, capturing detailed metadata.
+                    </p>
+                    
+                    <h4 style="color: var(--accent-color); margin: 15px 0 10px 0;">Example Metrics:</h4>
+                    <div style="background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+                        <div style="color: #4fc3f7;">s3_event_total</div>
+                        <!-- Removed deprecated: s3_event_user_total -->
+                        <div style="color: #4fc3f7;">s3_event_ip_total</div>
+                        <div style="color: #4fc3f7;">s3_event_anomaly_total</div>
+                    </div>
+                    
+                    <h4 style="color: var(--accent-color); margin: 15px 0 10px 0;">Best For:</h4>
+                    <ul style="color: var(--text-secondary); padding-left: 20px;">
+                        <li>Real-time security monitoring</li>
+                        <!-- Removed deprecated: User activity tracking -->
+                        <li>Anomaly & threat detection</li>
+                        <li>Operational event analysis</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto; margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden;">
+                    <thead style="background: var(--primary-gradient);">
+                        <tr>
+                            <th style="padding: 15px; text-align: left; color: white; font-weight: 600;">Aspect</th>
+                            <th style="padding: 15px; text-align: center; color: white; font-weight: 600;">Inventory-Based</th>
+                            <th style="padding: 15px; text-align: center; color: white; font-weight: 600;">Event-Driven</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">Data Collection</td>
+                            <td style="padding: 15px; text-align: center; color: #ffa500;">⏱️ Periodic scanning<br><small>Minutes to hours intervals</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">⚡ Real-time processing<br><small>Sub-second event capture</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
+                            <td style="padding: 15px; font-weight: 500;">Information Type</td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Current state<br><small>What exists right now</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Event details<br><small>Who, when, what happened</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">API Usage</td>
+                            <td style="padding: 15px; text-align: center; color: #ffa500;">⚠️ High ListObjects calls<br><small>Can be expensive</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ SQS message processing<br><small>Cost-efficient</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
+                            <td style="padding: 15px; font-weight: 500;">Scalability</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ Limited by API rate limits<br><small>Struggles with large buckets</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Horizontally scalable<br><small>Handles any event volume</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">Historical Data</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ No historical events<br><small>Only current state</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Complete event history<br><small>Every operation tracked</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
+                            <td style="padding: 15px; font-weight: 500;">Security Insights</td>
+                            <td style="padding: 15px; text-align: center; color: #ff6666;">❌ No user/IP tracking<br><small>Cannot detect threats</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Full security analysis<br><small>User, IP, anomaly detection</small></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 15px; font-weight: 500;">Use Case Focus</td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Capacity & cost management<br><small>Storage optimization</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Security & operations<br><small>Real-time monitoring</small></td>
+                        </tr>
+                        <tr style="background: rgba(255, 255, 255, 0.02);">
+                            <td style="padding: 15px; font-weight: 500;">Complementary Value</td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Storage state snapshots<br><small>Perfect for reporting</small></td>
+                            <td style="padding: 15px; text-align: center; color: #66ff66;">✅ Operational intelligence<br><small>Perfect for security</small></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: rgba(156, 39, 176, 0.1); border: 1px solid rgba(156, 39, 176, 0.3); border-radius: 15px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #9c27b0; margin-bottom: 15px;">🔄 The Perfect Combination</h3>
+                <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7; margin-bottom: 15px;">
+                    <strong>These approaches are complementary, not competitive.</strong> A complete S3 monitoring strategy combines both:
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div>
+                        <h4 style="color: #ff9800; margin-bottom: 10px;">📊 Inventory Monitoring For:</h4>
+                        <ul style="color: var(--text-secondary); padding-left: 20px; line-height: 1.6;">
+                            <li>Weekly/monthly capacity reports</li>
+                            <li>Cost optimization analysis</li>
+                            <li>Storage trend identification</li>
+                            <li>Compliance state verification</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent-color); margin-bottom: 10px;">⚡ Event Monitoring For:</h4>
+                        <ul style="color: var(--text-secondary); padding-left: 20px; line-height: 1.6;">
+                            <li>Real-time security alerts</li>
+                            <!-- Removed deprecated: User activity tracking -->
+                            <li>Anomaly detection</li>
+                            <li>Operational dashboards</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Architecture -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-sitemap"></i>
+                Architecture Overview
+            </h2>
+            <p class="section-description">
+                The S3 Event Exporter follows a cloud-native architecture designed for scalability, reliability, and observability. 
+                The complete monitoring stack includes Prometheus for metrics collection and Grafana for beautiful dashboard visualizations.
+                Hover over each component to see interactive animations demonstrating the data flow.
+            </p>
+            
+            <div class="architecture-diagram">
+                <div class="arch-component s3-component" data-tooltip="Amazon S3 Event Source - File operations trigger events">
+                    <div class="component-icon">
+                        <i class="fab fa-aws"></i>
+                    </div>
+                    <div class="component-label">Amazon S3</div>
+                    <div class="file-export-animation">
+                        <div class="file-particle"></div>
+                        <div class="file-particle"></div>
+                        <div class="file-particle"></div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">
+                    <div class="arrow-line"></div>
+                    <div class="arrow-head"></div>
+                    <div class="data-flow"></div>
+                </div>
+                
+                <div class="arch-component sqs-component" data-tooltip="SQS Queue Processing - Event buffering and delivery">
+                    <div class="component-icon">
+                        <i class="fas fa-stream"></i>
+                    </div>
+                    <div class="component-label">Amazon SQS</div>
+                    <div class="queue-animation">
+                        <div class="queue-item"></div>
+                        <div class="queue-item"></div>
+                        <div class="queue-item"></div>
+                        <div class="queue-item"></div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">
+                    <div class="arrow-line"></div>
+                    <div class="arrow-head"></div>
+                    <div class="data-flow"></div>
+                </div>
+                
+                <div class="arch-component exporter-component" data-tooltip="S3 Event Processing Engine - Go application processing events">
+                    <div class="component-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="component-label">S3 Event Exporter</div>
+                    <div class="gear-animation">
+                        <div class="gear gear-1">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="gear gear-2">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">
+                    <div class="arrow-line"></div>
+                    <div class="arrow-head"></div>
+                    <div class="data-flow"></div>
+                </div>
+                
+                <div class="arch-component prometheus-component" data-tooltip="Metrics Collection & Monitoring - Real-time observability">
+                    <div class="component-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="component-label">Prometheus</div>
+                    <div class="monitoring-animation">
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring"></div>
+                        <div class="metrics-dots">
+                            <div class="metric-dot"></div>
+                            <div class="metric-dot"></div>
+                            <div class="metric-dot"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">
+                    <div class="arrow-line"></div>
+                    <div class="arrow-head"></div>
+                    <div class="data-flow"></div>
+                </div>
+                
+                <div class="arch-component grafana-component" data-tooltip="Data Visualization & Dashboards - Beautiful metrics visualization">
+                    <div class="component-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="component-label">Grafana</div>
+                    <div class="dashboard-animation">
+                        <div class="chart-bars">
+                            <div class="chart-bar"></div>
+                            <div class="chart-bar"></div>
+                            <div class="chart-bar"></div>
+                            <div class="chart-bar"></div>
+                        </div>
+                        <div class="dashboard-grid">
+                            <div class="dashboard-panel"></div>
+                            <div class="dashboard-panel"></div>
+                            <div class="dashboard-panel"></div>
+                            <div class="dashboard-panel"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-download"></i>
+                Installation Methods
+            </h2>
+            <p class="section-description">
+                Choose from multiple installation methods based on your infrastructure setup and requirements.
+            </p>
+            
+            <div class="installation-grid">
+                <div class="install-method">
+                    <h3><i class="fas fa-helm"></i> Helm Installation (Recommended)</h3>
+                    <p>Production-ready deployment with configurable values and resource management.</p>
+                    <div class="code-snippet">
+<code># Add the Helm repo
+helm repo add helm-charts \
+    https://code-by-rupinder.github.io/helm-charts/
+helm repo update
+
+# Install with default values
+helm install s3-event-exporter \
+    helm-charts/s3-event-exporter
+
+# Install with custom values
+helm install s3-event-exporter \
+    helm-charts/s3-event-exporter \
+    --set config.sqs.queueUrl="https://sqs.region.amazonaws.com/account/queue" \
+    --set config.metrics.enabled=true
+</code>
+                    </div>
+                </div>
+                
+                <div class="install-method">
+                    <h3><i class="fab fa-docker"></i> Docker Installation</h3>
+                    <p>Containerized deployment with volume mounting for configuration.</p>
+                    <div class="code-snippet">
+                        <code># Pull the latest image
+docker pull codebyrupinder/s3-event-exporter:latest
+
+# Run with configuration file
+docker run -d \
+  -v $(pwd)/config.yaml:/app/config.yaml \
+  -p 8080:8080 \
+  codebyrupinder/s3-event-exporter:latest
+
+# Run with environment variables
+docker run -d \
+  -e SQS_QUEUE_URL="https://sqs.region.amazonaws.com/account/queue" \
+  -e METRICS_ENABLED="true" \
+  -p 8080:8080 \
+  codebyrupinder/s3-event-exporter:latest</code>
+                    </div>
+                </div>
+                
+                <div class="install-method">
+                    <h3><i class="fas fa-dharmachakra"></i> Kubernetes YAML</h3>
+                    <p>Direct Kubernetes deployment using YAML manifests.</p>
+                    <div class="code-snippet">
+                        <code># Apply all Kubernetes manifests
+kubectl apply -f k8s/
+
+# Create namespace and deploy
+kubectl create namespace s3-event-exporter
+kubectl apply -f k8s/ -n s3-event-exporter
+
+# Check deployment status
+kubectl get pods -n s3-event-exporter
+kubectl logs -f deployment/s3-event-exporter -n s3-event-exporter</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prometheus Metrics -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-bar"></i>
+                Prometheus Metrics
+            </h2>
+            <p class="section-description">
+                Comprehensive metrics suite providing deep insights into S3 event patterns, performance, and anomalies.
+                Each metric is designed for specific monitoring and alerting scenarios.
+            </p>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <h4>s3_event_total</h4>
+                    <p>Tracks all S3 events by type, bucket, and subtype. Enables monitoring of event patterns and helps identify unusual activity spikes or drops in S3 operations.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_event_object_size_bytes</h4>
+                    <p>Histogram of object sizes with configurable buckets (1KB to 16TB). Useful for storage optimization, cost analysis, and identifying large file uploads that might indicate data dumps or backups.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <!-- Removed deprecated: s3_event_user_total and its description -->
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_event_ip_total</h4>
+                    <p>Source IP tracking for security monitoring and geographic analysis. Helps detect unauthorized access attempts and unusual access patterns from unexpected locations.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_event_prefix_total</h4>
+                    <p>Object prefix distribution for storage pattern analysis. Enables understanding of how data is organized and accessed across different application components.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_events_hierarchical_path_total</h4>
+                    <p>Hierarchical path tracking at configurable directory depth. Provides insights into folder structure usage and helps optimize data organization strategies.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_bucket_extension_files_total</h4>
+                    <p>File type distribution by extension tracking both creation and deletion. Useful for understanding data types being stored and compliance monitoring.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_event_latency_seconds</h4>
+                    <p>Processing latency between event creation and processing. Critical for performance monitoring and ensuring real-time processing requirements are met.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_event_anomaly_total</h4>
+                    <p>Anomaly detection covering system deletes, delete markers, and bulk operations. Essential for security monitoring and detecting potentially malicious activities.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_lifecycle_expiration_total</h4>
+                    <p>Lifecycle policy deletion tracking by bucket and prefix. Helps monitor automated cleanup processes and optimize lifecycle policies for cost management.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_delete_total</h4>
+                    <p>Comprehensive delete tracking with type and reason classification. Provides detailed insights into deletion patterns and reasons, crucial for data retention compliance.</p>
+                </div>
+                
+                <div class="metric-item">
+                    <h4>s3_event_parser_errors_total</h4>
+                    <p>Event parsing error monitoring for reliability tracking. Ensures data quality and helps identify issues with event format changes or processing problems.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-cog"></i>
+                Configuration Options
+            </h2>
+            <p class="section-description">
+                Flexible configuration system supporting YAML files, environment variables, and Helm values. 
+                All aspects of the application can be tuned for your specific requirements.
+            </p>
+            
+            <div class="config-grid">
+                <div class="config-item">
+                    <h4>Metrics Control</h4>
+                    <p>Enable or disable individual metrics for optimized performance and reduced resource usage. Each metric type can be controlled independently.</p>
+                </div>
+                
+                <div class="config-item">
+                    <h4>SQS Integration</h4>
+                    <p>Configurable queue URLs, batch sizes (1-10), polling intervals, and visibility timeouts. Supports multiple queues and dead letter queue handling.</p>
+                </div>
+                
+                <div class="config-item">
+                    <h4>Histogram Buckets</h4>
+                    <p>Customizable size buckets for object size distribution analysis. Default exponential buckets from 1KB to 16TB with configurable ranges.</p>
+                </div>
+                
+                <div class="config-item">
+                    <h4>Path Depth Tracking</h4>
+                    <p>Configurable hierarchical path tracking depth (1-10) for analyzing folder structure usage patterns and optimizing data organization.</p>
+                </div>
+                
+                <div class="config-item">
+                    <h4>Resource Management</h4>
+                    <p>CPU and memory limits with Horizontal Pod Autoscaler (HPA) support. Configurable replica counts and resource requests/limits.</p>
+                </div>
+                
+                <div class="config-item">
+                    <h4>Security & Compliance</h4>
+                    <p>RBAC configuration, security contexts, pod security policies, and network policies for enterprise security requirements.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sample Configuration -->
+        <section class="doc-section">
+            <h2 class="section-title">
+                <i class="fas fa-file-code"></i>
+                Sample Configuration
+            </h2>
+            <p class="section-description">
+                Complete YAML configuration example with all available parameters and their descriptions.
+            </p>
+            
+            <div class="code-snippet">
+                <code># config.yaml - Complete configuration example
+server:
+  port: 8080
+  host: "0.0.0.0"
+  readTimeout: "30s"
+  writeTimeout: "30s"
+
+sqs:
+  queueUrl: "https://sqs.us-east-1.amazonaws.com/123456789012/s3-events"
+  batchSize: 10
+  pollInterval: "5s"
+  visibilityTimeout: "30s"
+  maxRetries: 3
+
+metrics:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+  
+  # Object size histogram buckets (bytes)
+  objectSizeBuckets: [1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216]
+  
+  # Hierarchical path tracking depth
+  prefixDepth: 2
+  
+  # Individual metric controls
+  types:
+    eventTotal: true
+    objectSize: true
+    # userTotal: true (removed deprecated metric)
+    ipTotal: true
+    prefixTotal: true
+    prefixDepthTotal: true
+    fileExtensionTotal: true
+    latency: true
+    anomalyDetection: true
+    lifecycleExpiration: true
+    deleteTotal: true
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+
+aws:
+  region: "us-east-1"
+  # Optional: specify credentials (use IAM roles in production)
+  # accessKeyId: ""
+  # secretAccessKey: ""
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilization: 70
+  targetMemoryUtilization: 80</code>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="doc-links">
+            <a href="https://github.com/codebyrupinder/s3-event-exporter" class="doc-link">
+                <i class="fab fa-github"></i>
+                Contribute on GitHub
+            </a>
+            <a href="https://github.com/codebyrupinder/s3-event-exporter/issues" class="doc-link">
+                <i class="fas fa-bug"></i>
+                Report Issues
+            </a>
+            <a href="../" class="doc-link">
+                <i class="fas fa-home"></i>
+                Back to Portfolio
+            </a>
+        </div>
+    </main>
+</body>
+</html>
